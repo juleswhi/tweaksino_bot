@@ -16,7 +16,6 @@
     }
 
     public static async Task ClientReady() {
-
         var register = new Discord.SlashCommandBuilder()
             .WithName("register")
             .WithDescription("Register Discord Account To Bank Account")
@@ -29,7 +28,7 @@
             .AddOption("id", Discord.ApplicationCommandOptionType.String, "Balance of account", isRequired: false);
 
         var send = new Discord.SlashCommandBuilder()
-            .WithName("transferc")
+            .WithName("transfer")
             .WithDescription("Send Money To Someone")
             .AddOption("user", Discord.ApplicationCommandOptionType.User, "User to send to", isRequired: true)
             .AddOption("amount", Discord.ApplicationCommandOptionType.Number, "Amount to send", isRequired: true);
