@@ -19,7 +19,6 @@
         var register = new Discord.SlashCommandBuilder()
             .WithName("register")
             .WithDescription("Register Discord Account To Bank Account")
-            .AddOption("id", Discord.ApplicationCommandOptionType.String, "Id", isRequired: true)
             .AddOption("password", Discord.ApplicationCommandOptionType.String, "Password", isRequired: true);
 
         var balance = new Discord.SlashCommandBuilder()
@@ -55,22 +54,46 @@
                 await SendHandler(cmd);
                 break;
         };
+    }
 
+    public static Bitch Get(string id) {
+        var bitches = DatabaseLayer.Query<Bitch>();
+        var b = bitches.FirstOrDefault(x => x.Id == id);
+        if(b is null) { return new Bitch{ Id = "" }; }
+
+        return b;
+    }
+
+    public static bool CorrectPassword(string id, string inp) {
+        var b = Get(id);
+        var base64 = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(inp));
+        return base64 == b.Password;
     }
 
 
     private static async Task RegisterHandler(Discord.WebSocket.SocketSlashCommand cmd) {
-        var id = (string)cmd.Data.Options.First().Value;
         var pw = (string)cmd.Data.Options.First(x => x.Name == "password").Value;
+
+        var b = DatabaseLayer.Query<Bitch>().FirstOrDefault(x => CorrectPassword(x.Id, pw));
+
+        if(b is null) {
+            var error_embed = new Discord.EmbedBuilder()
+                .WithTitle($"Password Is Incorrect")
+                .WithColor(Discord.Color.Red)
+                .WithCurrentTimestamp();
+
+            await cmd.RespondAsync(embed: error_embed.Build(), ephemeral: true);
+            return;
+        }
 
         var user_id = cmd.User.Id;
 
         var db = new DiscordBitch() {
             DiscordId = user_id.ToString(),
-            BitchId = id
+            BitchId = b.Id
         };
 
-        if(DatabaseLayer.Query<DiscordBitch>().FirstOrDefault(x => x.BitchId == id) != null) {
+        if(DatabaseLayer.Query<DiscordBitch>().FirstOrDefault(x => x.BitchId == b.Id) != null) {
             var error_embed = new Discord.EmbedBuilder()
                 .WithTitle($"Account Already Registered")
                 .WithColor(Discord.Color.Red)
