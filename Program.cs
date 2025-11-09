@@ -29,7 +29,7 @@
             .AddOption("id", Discord.ApplicationCommandOptionType.String, "Balance of account", isRequired: false);
 
         var send = new Discord.SlashCommandBuilder()
-            .WithName("send")
+            .WithName("transferc")
             .WithDescription("Send Money To Someone")
             .AddOption("user", Discord.ApplicationCommandOptionType.User, "User to send to", isRequired: true)
             .AddOption("amount", Discord.ApplicationCommandOptionType.Number, "Amount to send", isRequired: true);
@@ -52,7 +52,7 @@
             case "balance":
                 await BalanceHandler(cmd);
                 break;
-            case "send":
+            case "transfer":
                 await SendHandler(cmd);
                 break;
         };
