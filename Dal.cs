@@ -16,6 +16,46 @@ public class DiscordBitch : IDatabaseModel {
     public string BitchId { get; set; } = "";
 }
 
+public class Shop {
+    [PrimaryKey]
+    public int Id { get; set; } = 0;
+}
+
+public class McItem : IDatabaseModel {
+    [PrimaryKey]
+    public string Id { get; set; } = "";
+    public double Price { get; set; } = 1;
+}
+
+public class ShopItem : IDatabaseModel {
+    [PrimaryKey]
+    [ForeignKey(typeof(Shop))]
+    public Shop ShopId { get; set; } = new();
+
+    [PrimaryKey]
+    [ForeignKey(typeof(McItem))]
+    public McItem McItemId { get; set; } = new();
+
+    public int Quantity { get; set; }
+}
+
+public class ShopOrder : IDatabaseModel {
+    [PrimaryKey]
+    public int Id { get; set; }
+
+    [ForeignKey(typeof(Shop))]
+    public Shop ShopId { get; set; } = new();
+
+    [ForeignKey(typeof(McItem))]
+    public McItem McItemId { get; set; } = new();
+
+    [ForeignKey(typeof(Bitch))]
+    public Bitch UserId { get; set; } = new();
+
+    public int Quantity { get; set; }
+    public bool Collected { get; set; } = false;
+}
+
 [AttributeUsage(AttributeTargets.Property)]
 internal class PrimaryKey : Attribute { }
 

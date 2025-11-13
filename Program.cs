@@ -32,6 +32,10 @@
             .AddOption("user", Discord.ApplicationCommandOptionType.User, "User to send to", isRequired: true)
             .AddOption("amount", Discord.ApplicationCommandOptionType.Number, "Amount to send", isRequired: true);
 
+        var shop = new Discord.SlashCommandBuilder()
+            .WithName("shop")
+            .WithDescription("Open the shop");
+
         try {
             await _client.CreateGlobalApplicationCommandAsync(register.Build());
             await _client.CreateGlobalApplicationCommandAsync(balance.Build());
@@ -52,6 +56,9 @@
                 break;
             case "transfer":
                 await SendHandler(cmd);
+                break;
+            case "items":
+
                 break;
         };
     }
@@ -148,13 +155,12 @@
             .WithColor(Discord.Color.Green)
             .WithCurrentTimestamp();
 
-        await cmd.RespondAsync(embed: embed.Build());
+        await cmd.RespondAsync(embed: embed.Build(), ephemeral: true);
     }
 
     private static async Task SendHandler(Discord.WebSocket.SocketSlashCommand cmd) {
         var user = (Discord.WebSocket.SocketGuildUser)cmd.Data.Options.First(x => x.Name == "user").Value;
         var amount = (double)cmd.Data.Options.First(x => x.Name == "amount").Value;
-
 
         var u1 = DatabaseLayer.Query<DiscordBitch>().FirstOrDefault(x => x.DiscordId == cmd.User.Id.ToString());
 
@@ -208,6 +214,19 @@
             .WithCurrentTimestamp();
 
         await cmd.RespondAsync(embed: embed.Build(), ephemeral: true);
+    }
+
+    public static async Task ItemsHandler(Discord.WebSocket.SocketSlashCommand cmd) {
+
+
+        var embed = new Discord.EmbedBuilder()
+            .WithTitle($"Tweaky Shop")
+            .WithDescription($"")
+            .WithColor(Discord.Color.Blue)
+            .WithCurrentTimestamp();
+
+        await cmd.RespondAsync(embed: embed.Build(), ephemeral: true);
+
     }
 
     private static Task Log(Discord.LogMessage msg) {
