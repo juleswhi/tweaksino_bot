@@ -43,8 +43,9 @@
                     .WithType(Discord.ApplicationCommandOptionType.String);
 
         Enum.GetValues<Item>()
+            .Select(x => Enum.GetName(typeof(Item), x))
             .ToList()
-            .ForEach(x => sell_item_builder = sell_item_builder.AddChoice(Enum.GetName(typeof(Item), x), (int)x));
+            .ForEach(x => sell_item_builder = sell_item_builder.AddChoice(x, x));
 
         var sell = new Discord.SlashCommandBuilder()
             .WithName("sell")
