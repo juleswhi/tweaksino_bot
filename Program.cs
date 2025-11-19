@@ -238,7 +238,7 @@
 
     public static async Task SellHandler(Discord.WebSocket.SocketSlashCommand cmd) {
         var item = (string)cmd.Data.Options.FirstOrDefault(x => x.Name == "item")!.Value;
-        var amount = (int)cmd.Data.Options.FirstOrDefault(x => x.Name == "amount")!.Value;
+        var amount = (long)cmd.Data.Options.FirstOrDefault(x => x.Name == "amount")!.Value;
         var price = (double)cmd.Data.Options.FirstOrDefault(x => x.Name == "price")!.Value;
 
         var discord_user = DatabaseLayer
@@ -268,7 +268,7 @@
             ShopId = 0,
             SellerId = user!.Id,
             McItemId = item_name,
-            Quantity = amount,
+            Quantity = (int)amount,
             SinglePrice = price,
         };
 
