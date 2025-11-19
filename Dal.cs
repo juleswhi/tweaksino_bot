@@ -2,7 +2,7 @@ using Microsoft.Data.Sqlite;
 
 public interface IDatabaseModel {}
 
-public class Bitch : IDatabaseModel {
+public class User : IDatabaseModel {
     [PrimaryKey]
     public string Id { get; set; } = "";
     public double Money { get; set; } = 0;
@@ -12,7 +12,7 @@ public class Bitch : IDatabaseModel {
 public class DiscordBitch : IDatabaseModel {
     [PrimaryKey]
     public string DiscordId { get; set; } = "";
-    [ForeignKey(typeof(Bitch))]
+    [ForeignKey(typeof(User))]
     public string BitchId { get; set; } = "";
 }
 
@@ -21,36 +21,30 @@ public class Shop {
     public int Id { get; set; } = 0;
 }
 
-public class McItem : IDatabaseModel {
+public class ItemAuction : IDatabaseModel {
     [PrimaryKey]
-    public string Id { get; set; } = "";
-    public double Price { get; set; } = 1;
-}
+    public int Id { get; set; } = 0;
 
-public class ShopItem : IDatabaseModel {
     [PrimaryKey]
     [ForeignKey(typeof(Shop))]
     public Shop ShopId { get; set; } = new();
 
-    [PrimaryKey]
-    [ForeignKey(typeof(McItem))]
-    public McItem McItemId { get; set; } = new();
+    [ForeignKey(typeof(User))]
+    public User Seller { get; set; } = new();
 
+    public string McItemId { get; set; } = "";
     public int Quantity { get; set; }
+    public double SinglePrice { get; set; }
+
+    public bool Deposited { get; set; } = false;
 }
 
 public class ShopOrder : IDatabaseModel {
     [PrimaryKey]
     public int Id { get; set; }
 
-    [ForeignKey(typeof(Shop))]
-    public Shop ShopId { get; set; } = new();
-
-    [ForeignKey(typeof(McItem))]
-    public McItem McItemId { get; set; } = new();
-
-    [ForeignKey(typeof(Bitch))]
-    public Bitch UserId { get; set; } = new();
+    [ForeignKey(typeof(ItemAuction))]
+    public ItemAuction Auction { get; set; } = new();
 
     public int Quantity { get; set; }
     public bool Collected { get; set; } = false;

@@ -36,10 +36,28 @@
             .WithName("shop")
             .WithDescription("Open the shop");
 
+
+        var sell_item_builder = new Discord.SlashCommandOptionBuilder()
+                    .WithName("item")
+                    .WithDescription("Item to sell")
+                    .WithType(Discord.ApplicationCommandOptionType.String);
+
+        Enum.GetValues<Item>()
+            .ToList()
+            .ForEach(x => sell_item_builder = sell_item_builder.AddChoice(x.ToString(), (int)x));
+
+        var sell = new Discord.SlashCommandBuilder()
+            .WithName("sell")
+            .WithDescription("Put an item up for auction")
+            .AddOption(sell_item_builder)
+            .AddOption("amount", Discord.ApplicationCommandOptionType.Number, "Amount to sell", isRequired: true)
+            .AddOption("price", Discord.ApplicationCommandOptionType.Number, "How much each item should sell for", isRequired: true);
+
         try {
             await _client.CreateGlobalApplicationCommandAsync(register.Build());
             await _client.CreateGlobalApplicationCommandAsync(balance.Build());
             await _client.CreateGlobalApplicationCommandAsync(send.Build());
+            await _client.CreateGlobalApplicationCommandAsync(sell.Build());
         } catch(ApplicationException ex) {
             _ = ex;
             Console.WriteLine("error");
@@ -57,16 +75,16 @@
             case "transfer":
                 await SendHandler(cmd);
                 break;
-            case "items":
-
+            case "sell":
+                await SellHandler(cmd);
                 break;
         };
     }
 
-    public static Bitch Get(string id) {
-        var bitches = DatabaseLayer.Query<Bitch>();
+    public static User Get(string id) {
+        var bitches = DatabaseLayer.Query<User>();
         var b = bitches.FirstOrDefault(x => x.Id == id);
-        if(b is null) { return new Bitch{ Id = "" }; }
+        if(b is null) { return new User{ Id = "" }; }
 
         return b;
     }
@@ -81,7 +99,7 @@
     private static async Task RegisterHandler(Discord.WebSocket.SocketSlashCommand cmd) {
         var pw = (string)cmd.Data.Options.First(x => x.Name == "password").Value;
 
-        var b = DatabaseLayer.Query<Bitch>().FirstOrDefault(x => CorrectPassword(x.Id, pw));
+        var b = DatabaseLayer.Query<User>().FirstOrDefault(x => CorrectPassword(x.Id, pw));
 
         if(b is null) {
             var error_embed = new Discord.EmbedBuilder()
@@ -144,7 +162,7 @@
 
         var username = cmd.User.GlobalName;
 
-        var bs = DatabaseLayer.Query<Bitch>();
+        var bs = DatabaseLayer.Query<User>();
         var b = bs.First(x => x.Id == id);
 
         Console.WriteLine($"{b.Id}");
@@ -174,7 +192,7 @@
             return;
         }
 
-        var u1b = DatabaseLayer.Query<Bitch>().FirstOrDefault(x => x.Id == u1.BitchId);
+        var u1b = DatabaseLayer.Query<User>().FirstOrDefault(x => x.Id == u1.BitchId);
 
         var u2 = DatabaseLayer.Query<DiscordBitch>().FirstOrDefault(x => x.DiscordId == user.Id.ToString());
 
@@ -188,7 +206,7 @@
             return;
         }
 
-        var u2b = DatabaseLayer.Query<Bitch>().FirstOrDefault(x => x.Id == u2.BitchId);
+        var u2b = DatabaseLayer.Query<User>().FirstOrDefault(x => x.Id == u2.BitchId);
 
         if(u1b!.Money < amount) {
             var error_embed = new Discord.EmbedBuilder()
@@ -210,6 +228,17 @@
         var embed = new Discord.EmbedBuilder()
             .WithTitle($"Send {amount} to account {u2.BitchId}")
             .WithDescription($"New balance: {u1b.Money}")
+            .WithColor(Discord.Color.Blue)
+            .WithCurrentTimestamp();
+
+        await cmd.RespondAsync(embed: embed.Build(), ephemeral: true);
+    }
+
+    public static async Task SellHandler(Discord.WebSocket.SocketSlashCommand cmd) {
+        var item = cmd.Data.Options.FirstOrDefault(x => x.Name == "item");
+        var embed = new Discord.EmbedBuilder()
+            .WithTitle($"Selling Item: {item!.Value}")
+            .WithDescription($"Now go to the in-game bank and deposit your items")
             .WithColor(Discord.Color.Blue)
             .WithCurrentTimestamp();
 
