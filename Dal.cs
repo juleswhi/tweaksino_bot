@@ -9,7 +9,7 @@ public class User : IDatabaseModel {
     public string Password { get; set; } = "";
 }
 
-public class DiscordBitch : IDatabaseModel {
+public class DiscordUser : IDatabaseModel {
     [PrimaryKey]
     public string DiscordId { get; set; } = "";
     [ForeignKey(typeof(User))]
