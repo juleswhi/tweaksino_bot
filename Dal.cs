@@ -13,7 +13,7 @@ public class DiscordUser : IDatabaseModel {
     [PrimaryKey]
     public string DiscordId { get; set; } = "";
     [ForeignKey(typeof(User))]
-    public string BitchId { get; set; } = "";
+    public string UserId { get; set; } = "";
 }
 
 public class Shop {
@@ -27,10 +27,10 @@ public class ItemAuction : IDatabaseModel {
 
     [PrimaryKey]
     [ForeignKey(typeof(Shop))]
-    public Shop ShopId { get; set; } = new();
+    public int ShopId { get; set; } = new();
 
     [ForeignKey(typeof(User))]
-    public User Seller { get; set; } = new();
+    public string SellerId { get; set; } = "";
 
     public string McItemId { get; set; } = "";
     public int Quantity { get; set; }

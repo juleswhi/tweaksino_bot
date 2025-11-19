@@ -40,6 +40,7 @@
         var sell_item_builder = new Discord.SlashCommandOptionBuilder()
                     .WithName("item")
                     .WithDescription("Item to sell")
+                    .WithRequired(true)
                     .WithType(Discord.ApplicationCommandOptionType.String);
 
         Enum.GetValues<Item>()
@@ -116,10 +117,10 @@
 
         var db = new DiscordUser() {
             DiscordId = user_id.ToString(),
-            BitchId = b.Id
+            UserId = b.Id
         };
 
-        if(DatabaseLayer.Query<DiscordUser>().FirstOrDefault(x => x.BitchId == b.Id) != null) {
+        if(DatabaseLayer.Query<DiscordUser>().FirstOrDefault(x => x.UserId == b.Id) != null) {
             var error_embed = new Discord.EmbedBuilder()
                 .WithTitle($"Account Already Registered")
                 .WithColor(Discord.Color.Red)
@@ -158,7 +159,7 @@
                 return;
             }
 
-            id = db.BitchId;
+            id = db.UserId;
         }
 
         var username = cmd.User.GlobalName;
@@ -193,7 +194,7 @@
             return;
         }
 
-        var u1b = DatabaseLayer.Query<User>().FirstOrDefault(x => x.Id == u1.BitchId);
+        var u1b = DatabaseLayer.Query<User>().FirstOrDefault(x => x.Id == u1.UserId);
 
         var u2 = DatabaseLayer.Query<DiscordUser>().FirstOrDefault(x => x.DiscordId == user.Id.ToString());
 
@@ -207,7 +208,7 @@
             return;
         }
 
-        var u2b = DatabaseLayer.Query<User>().FirstOrDefault(x => x.Id == u2.BitchId);
+        var u2b = DatabaseLayer.Query<User>().FirstOrDefault(x => x.Id == u2.UserId);
 
         if(u1b!.Money < amount) {
             var error_embed = new Discord.EmbedBuilder()
@@ -227,7 +228,7 @@
         DatabaseLayer.Update(u2b);
 
         var embed = new Discord.EmbedBuilder()
-            .WithTitle($"Send {amount} to account {u2.BitchId}")
+            .WithTitle($"Send {amount} to account {u2.UserId}")
             .WithDescription($"New balance: {u1b.Money}")
             .WithColor(Discord.Color.Blue)
             .WithCurrentTimestamp();
@@ -236,9 +237,45 @@
     }
 
     public static async Task SellHandler(Discord.WebSocket.SocketSlashCommand cmd) {
-        var item = cmd.Data.Options.FirstOrDefault(x => x.Name == "item");
+        var item = (string)cmd.Data.Options.FirstOrDefault(x => x.Name == "item")!.Value;
+        var amount = (int)cmd.Data.Options.FirstOrDefault(x => x.Name == "amount")!.Value;
+        var price = (double)cmd.Data.Options.FirstOrDefault(x => x.Name == "price")!.Value;
+
+        var discord_user = DatabaseLayer
+            .Query<DiscordUser>()
+            .Where(x => x.DiscordId == cmd.User.Id.ToString())
+            .FirstOrDefault();
+
+        if(discord_user is null) {
+            var error_embed = new Discord.EmbedBuilder()
+                .WithTitle($"Could not find user: {cmd.User.GlobalName}")
+                .WithDescription($"You have not registered with the bank.\nPlease use /help to learn how to register")
+                .WithColor(Discord.Color.Red)
+                .WithCurrentTimestamp();
+
+            await cmd.RespondAsync(embed: error_embed.Build(), ephemeral: true);
+            return;
+        }
+
+        var user = DatabaseLayer
+            .Query<User>()
+            .Where(x => x.Id == discord_user.UserId.ToString())
+            .FirstOrDefault();
+
+        var item_name = ItemHelper.ItemMap[(Item)Enum.Parse(typeof(Item), item)];
+
+        var auction = new ItemAuction() {
+            ShopId = 0,
+            SellerId = user!.Id,
+            McItemId = item_name,
+            Quantity = amount,
+            SinglePrice = price,
+        };
+
+        DatabaseLayer.Create(auction);
+
         var embed = new Discord.EmbedBuilder()
-            .WithTitle($"Selling Item: {item!.Value}")
+            .WithTitle($"Selling Item: {item!}")
             .WithDescription($"Now go to the in-game bank and deposit your items")
             .WithColor(Discord.Color.Blue)
             .WithCurrentTimestamp();
