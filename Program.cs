@@ -113,12 +113,12 @@
 
         var user_id = cmd.User.Id;
 
-        var db = new DiscordBitch() {
+        var db = new DiscordUser() {
             DiscordId = user_id.ToString(),
             BitchId = b.Id
         };
 
-        if(DatabaseLayer.Query<DiscordBitch>().FirstOrDefault(x => x.BitchId == b.Id) != null) {
+        if(DatabaseLayer.Query<DiscordUser>().FirstOrDefault(x => x.BitchId == b.Id) != null) {
             var error_embed = new Discord.EmbedBuilder()
                 .WithTitle($"Account Already Registered")
                 .WithColor(Discord.Color.Red)
@@ -128,7 +128,7 @@
             return;
         }
 
-        DatabaseLayer.Create<DiscordBitch>(db);
+        DatabaseLayer.Create<DiscordUser>(db);
 
         var embed = new Discord.EmbedBuilder()
             .WithTitle($"Registered Account")
@@ -146,7 +146,7 @@
         if(option is not null) {
             id = (string)option.Value;
         } else {
-            var db = DatabaseLayer.Query<DiscordBitch>().FirstOrDefault(x => x.DiscordId == cmd.User.Id.ToString());
+            var db = DatabaseLayer.Query<DiscordUser>().FirstOrDefault(x => x.DiscordId == cmd.User.Id.ToString());
             if(db is null) {
                 var error_embed = new Discord.EmbedBuilder()
                     .WithTitle($"Please Specify an id")
@@ -180,7 +180,7 @@
         var user = (Discord.WebSocket.SocketGuildUser)cmd.Data.Options.First(x => x.Name == "user").Value;
         var amount = (double)cmd.Data.Options.First(x => x.Name == "amount").Value;
 
-        var u1 = DatabaseLayer.Query<DiscordBitch>().FirstOrDefault(x => x.DiscordId == cmd.User.Id.ToString());
+        var u1 = DatabaseLayer.Query<DiscordUser>().FirstOrDefault(x => x.DiscordId == cmd.User.Id.ToString());
 
         if(u1 is null) {
             var error_embed = new Discord.EmbedBuilder()
@@ -194,7 +194,7 @@
 
         var u1b = DatabaseLayer.Query<User>().FirstOrDefault(x => x.Id == u1.BitchId);
 
-        var u2 = DatabaseLayer.Query<DiscordBitch>().FirstOrDefault(x => x.DiscordId == user.Id.ToString());
+        var u2 = DatabaseLayer.Query<DiscordUser>().FirstOrDefault(x => x.DiscordId == user.Id.ToString());
 
         if(u2 is null) {
             var error_embed = new Discord.EmbedBuilder()
