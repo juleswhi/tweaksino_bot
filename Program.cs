@@ -52,7 +52,7 @@
             .WithName("sell")
             .WithDescription("Put an item up for auction")
             .AddOption(sell_item_builder)
-            .AddOption("amount", Discord.ApplicationCommandOptionType.Number, "Amount to sell", isRequired: true)
+            .AddOption("amount", Discord.ApplicationCommandOptionType.Integer, "Amount to sell", isRequired: true)
             .AddOption("price", Discord.ApplicationCommandOptionType.Number, "How much each item should sell for", isRequired: true);
 
         try {
@@ -284,8 +284,6 @@
     }
 
     public static async Task ItemsHandler(Discord.WebSocket.SocketSlashCommand cmd) {
-
-
         var embed = new Discord.EmbedBuilder()
             .WithTitle($"Tweaky Shop")
             .WithDescription($"")
